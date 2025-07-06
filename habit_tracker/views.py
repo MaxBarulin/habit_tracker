@@ -15,6 +15,9 @@ class HabitViewSet(ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)  # Присваиваем владельца привычки
 
+    def get_queryset(self):
+        return Habit.objects.filter(user=self.request.user)
+
 
 class PublishHabitAPIView(ListAPIView):
     """Реализация просмотра публичных привычек через ListAPIView."""
