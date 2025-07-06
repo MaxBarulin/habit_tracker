@@ -27,6 +27,7 @@ stripe = "^12.3.0"
 celery = "^5.5.3"
 eventlet = "^0.40.1"
 django-celery-beat = "^2.8.1"
+django-cors-headers = "^4.7.0"
 
 
 [build-system]
