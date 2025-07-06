@@ -9,9 +9,11 @@ class UserAdmin(admin.ModelAdmin):
 
     list_display = (
         "id",
-        "email",
+        "username",
+        "tg_chat_id",
     )
     list_filter = (
-        "email",
+        "username",
+        "tg_chat_id",
     )
-    search_fields = ("id", "email",)
+    search_fields = ("id", "username", "tg_chat_id",)

@@ -4,7 +4,7 @@ from django.db import models
 
 class User(AbstractUser):
     username = models.CharField(max_length=255, unique=True, verbose_name='Имя пользователя')
-    tg_chat_id = models.CharField(max_length=50, verbose_name='Телеграм чат-id')
+    tg_chat_id = models.CharField(max_length=50, unique=True, verbose_name='Телеграм чат-id')
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
