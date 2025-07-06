@@ -20,11 +20,11 @@ class RewardValidator:
         if sign_pleasant_habit is True:
             if reward is not None or related_habit is not None:
                 raise ValidationError("У приятной привычки не может быть вознаграждения или связанной привычки.")
-        else:
-            if reward is related_habit:
-                raise ValidationError("Нужно выбрать вознаграждение (reward) или приятную привычку (related_habit).")
-            elif reward is not None and related_habit is not None:
-                raise ValidationError("Нельзя одновременно выбрать вознаграждение и приятную привычку.")
+
+        if reward is related_habit:
+            raise ValidationError("Нужно выбрать вознаграждение (reward) или приятную привычку (related_habit).")
+        elif reward is not None and related_habit is not None:
+            raise ValidationError("Нельзя одновременно выбрать вознаграждение и приятную привычку.")
 
 
 class TimeToCompleteValidator:
