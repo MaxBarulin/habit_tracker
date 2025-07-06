@@ -19,7 +19,7 @@ class HabitTrackerTestCase(APITestCase):
         self.habit = Habit.objects.create(
             user=self.user,
             location="Дом",
-            time="2025-01-12 12:30:00",
+            time="12:30:00",
             action="Посидеть",
             sign_pleasant_habit=False,
             time_to_complete=60,
@@ -30,7 +30,7 @@ class HabitTrackerTestCase(APITestCase):
         self.data = {
             "user": 1,
             "location": "Дом",
-            "time": "2025-01-12 12:30:00",
+            "time": "12:30:00",
             "action": "Посидеть",
             "sign_pleasant_habit": False,
             "time_to_complete": 60,
@@ -49,7 +49,7 @@ class HabitTrackerTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(
             response.json(),
-            {'id': 2, 'location': 'Дом', 'time': '2025-01-12T12:30:00+03:00', 'action': 'Посидеть',
+            {'id': 2, 'location': 'Дом', 'time': '12:30:00', 'action': 'Посидеть',
              'sign_pleasant_habit': False, 'periodicity': 1, 'reward': 'посидеть', 'time_to_complete': 60,
              'sign_public': False, 'related_habit': None}
         )
