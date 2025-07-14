@@ -1,5 +1,5 @@
 # Указываем базовый образ
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 # Устанавливаем рабочую директорию в контейнере
 WORKDIR /habit_tracker
