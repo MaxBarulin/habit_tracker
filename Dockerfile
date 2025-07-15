@@ -4,11 +4,11 @@ FROM python:3.13-slim
 # Устанавливаем рабочую директорию в контейнере
 WORKDIR /habit_tracker
 
-RUN apt-get update && apt-get install -y \
-    gcc \
-    libpq-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# Установка системных зависимостей
+RUN apt-get update && \
+    apt-get install -y gcc libpq-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Устанавливаем Poetry
 RUN pip install poetry
@@ -25,8 +25,5 @@ COPY . .
 # Создаем директорию для медиафайлов
 RUN mkdir -p /habit_tracker/staticfiles && chmod -R 755 /habit_tracker/staticfiles
 
-# Открываем порт 8000 для взаимодействия с приложением
-EXPOSE 8000
-
-# Определяем команду для запуска приложения
-CMD ["poetry", "run", "python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Собираем статику и запускаем gunicorn
+CMD sh -c "poetry run python manage.py collectstatic --noinput && poetry run gunicorn config.wsgi:application --bind 0.0.0.0:8000"

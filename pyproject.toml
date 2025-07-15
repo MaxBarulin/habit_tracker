@@ -30,6 +30,7 @@ django-celery-beat = "^2.8.1"
 django-cors-headers = "^4.7.0"
 schedule = "^1.2.2"
 gunicorn = "^23.0.0"
+whitenoise = "^6.9.0"
 
 
 [build-system]
