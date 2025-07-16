@@ -23,6 +23,10 @@ services:
     depends_on:
       - postgres
       - redis
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=${DEBUG}
+      - DATABASE_URL=postgres://${USER}:${PASSWORD}@postgres:${PORT}/${NAME}
     networks:
       - habit_tracker_network
 
@@ -34,6 +38,10 @@ services:
     depends_on:
       - postgres
       - redis
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=${DEBUG}
+      - DATABASE_URL=postgres://${USER}:${PASSWORD}@postgres:${PORT}/${NAME}
     networks:
       - habit_tracker_network
 
@@ -61,6 +69,19 @@ services:
     depends_on:
       - postgres
       - redis
+    networks:
+      - habit_tracker_network
+
+  nginx:
+    build:
+      context: ./nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - static_volume:/nginx/staticfiles
+    depends_on:
+      - habit_tracker
     networks:
       - habit_tracker_network
 
