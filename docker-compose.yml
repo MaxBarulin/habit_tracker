@@ -7,13 +7,9 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - habit_tracker_network
 
   redis:
     image: redis:latest
-    networks:
-      - habit_tracker_network
 
   celery:
     build: .
@@ -27,8 +23,6 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       - DEBUG=${DEBUG}
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${PORT}/${POSTGRES_DB}
-    networks:
-      - habit_tracker_network
 
   celery-beat:
     build: .
@@ -42,8 +36,6 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       - DEBUG=${DEBUG}
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${PORT}/${POSTGRES_DB}
-    networks:
-      - habit_tracker_network
 
   habit_tracker:
     build:
@@ -69,8 +61,6 @@ services:
     depends_on:
       - postgres
       - redis
-    networks:
-      - habit_tracker_network
 
   nginx:
     build:
@@ -82,11 +72,6 @@ services:
       - static_volume:/nginx/staticfiles
     depends_on:
       - habit_tracker
-    networks:
-      - habit_tracker_network
-
-networks:
-  habit_tracker_network:
 
 volumes:
   postgres_data:
