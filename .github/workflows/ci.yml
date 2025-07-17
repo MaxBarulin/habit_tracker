@@ -99,11 +99,10 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-#             Переменные для удобства
+
             PROJECT_DIR=~/habit_tracker 
             GIT_REPO_URL=https://github.com/MaxBarulin/habit_tracker.git 
             
-            # 1. Клонируем или обновляем репозиторий
             if [ -d "$PROJECT_DIR" ]; then
               echo "Project directory exists. Pulling latest changes."
               cd $PROJECT_DIR
@@ -114,8 +113,6 @@ jobs:
               cd $PROJECT_DIR
             fi
             
-#             2. Создаем .env файл из секретов GitHub
-#             Важно: убедитесь, что все эти секреты созданы в настройках репозитория!
             echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > .env
             echo "DEBUG=False" >> .env
             echo "NAME=${{ secrets.NAME }}" >> .env
@@ -123,29 +120,20 @@ jobs:
             echo "PASSWORD=${{ secrets.PASSWORD }}" >> .env
             echo "SERVER_IP=${{ secrets.SERVER_IP }}" >> .env
             echo "SSH_KEY=${{ secrets.POSTGRES_PASSWORD }}" >> .env
-            echo "SSH=USER${{ secrets.POSTGRES_PASSWORD }}" >> .env
-            echo "HOST=postgres" >> .env # Имя сервиса из docker-compose
-            echo "PORT=5432" >> .env
-#            echo "CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }}" >> .env
-#            echo "CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }}" >> .env
-#            echo "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}" >> .env
-            
-            # 3. Запускаем Docker Compose
-            # docker-compose pull скачает образы, которые вы запушили на Docker Hub
+            echo "SSH_USER${{ secrets.POSTGRES_PASSWORD }}" >> .env
+            echo "DOCKER_HUB_ACCESS_TOKEN${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" >> .env
+            echo "DOCKER_HUB_USERNAME${{ secrets.DOCKER_HUB_USERNAME }}" >> .env
+            echo "HOST=${{ secrets.HOST }}" >> .env 
+            echo "PORT=${{ secrets.PORT }}" >> .env
+
             docker-compose pull
             
-            # docker-compose up -d запустит все в фоновом режиме
-            # Флаг --build не нужен, так как мы используем готовые образы с Docker Hub
             docker-compose up -d
             
-            # 4. Применяем миграции после запуска
-            # Даем небольшую паузу, чтобы postgres успел запуститься
             echo "Waiting for database to be ready..."
             sleep 10 
             docker-compose exec backend python manage.py migrate --noinput
             
-            # 5. (Опционально) Собираем статику, если используете Nginx
-            # docker-compose exec backend python manage.py collectstatic --noinput
+            docker-compose exec backend python manage.py collectstatic --noinput
             
-            # 6. (Опционально) Очищаем старые неиспользуемые Docker-образы, чтобы экономить место
             docker image prune -af
