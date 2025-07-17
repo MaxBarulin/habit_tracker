@@ -101,11 +101,11 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': os.getenv('NAME'),
-            'USER': os.getenv('USER'),
-            'HOST': os.getenv('HOST'),
-            'PORT': os.getenv('PORT'),
-            'PASSWORD': os.getenv('PASSWORD')
+            'NAME': os.getenv('POSTGRES_DB'),
+            'USER': os.getenv('POSTGRES_USER'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+            'HOST': 'postgres', # Жестко прописано имя сервиса
+            'PORT': 5432,
         }
     }
 

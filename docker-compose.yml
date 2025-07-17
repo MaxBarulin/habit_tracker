@@ -26,7 +26,7 @@ services:
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - DEBUG=${DEBUG}
-      - DATABASE_URL=postgres://${USER}:${PASSWORD}@postgres:${PORT}/${NAME}
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${PORT}/${POSTGRES_DB}
     networks:
       - habit_tracker_network
 
@@ -41,7 +41,7 @@ services:
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - DEBUG=${DEBUG}
-      - DATABASE_URL=postgres://${USER}:${PASSWORD}@postgres:${PORT}/${NAME}
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${PORT}/${POSTGRES_DB}
     networks:
       - habit_tracker_network
 
@@ -58,7 +58,7 @@ services:
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - DEBUG=${DEBUG}
-      - DATABASE_URL=postgres://${USER}:${PASSWORD}@postgres:${PORT}/${NAME}
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${PORT}/${POSTGRES_DB}
       - EMAIL_BACKEND=${EMAIL_BACKEND}
       - EMAIL_HOST=${EMAIL_HOST}
       - EMAIL_PORT=${EMAIL_PORT}
