@@ -104,7 +104,7 @@ else:
             'NAME': os.getenv('POSTGRES_DB'),
             'USER': os.getenv('POSTGRES_USER'),
             'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-            'HOST': 'postgres', # Жестко прописано имя сервиса
+            'HOST': 'postgres',  # Жестко прописано имя сервиса
             'PORT': 5432,
         }
     }
