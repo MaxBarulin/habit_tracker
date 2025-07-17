@@ -81,20 +81,71 @@ jobs:
     needs: build
 
     steps:
-      - name: Check out code
-        uses: actions/checkout@v3
+      # Этот шаг не нужен, так как мы не используем код из этого checkout на сервере,
+      # а клонируем его заново. Его можно удалить для чистоты.
+      # - name: Check out code
+      #   uses: actions/checkout@v3
 
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.4
         with:
+          # Убедитесь, что имя секрета на GitHub 'SSH_PRIVATE_KEY', а не 'SSH_KEY'
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Deploy to Server
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            cd habit_tracker
-            git pull
-            sudo docker-compose pull
-            sudo docker-compose down
-            sudo docker-compose up -d --build
-          EOF
+      - name: Deploy to Server and Run
+        uses: appleboy/ssh-action@master # Используем готовый action, он удобнее
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+#             Переменные для удобства
+            PROJECT_DIR=~/habit_tracker 
+            GIT_REPO_URL=https://github.com/MaxBarulin/habit_tracker.git 
+            
+            # 1. Клонируем или обновляем репозиторий
+            if [ -d "$PROJECT_DIR" ]; then
+              echo "Project directory exists. Pulling latest changes."
+              cd $PROJECT_DIR
+              git pull
+            else
+              echo "Project directory does not exist. Cloning repository."
+              git clone $GIT_REPO_URL $PROJECT_DIR
+              cd $PROJECT_DIR
+            fi
+            
+#             2. Создаем .env файл из секретов GitHub
+#             Важно: убедитесь, что все эти секреты созданы в настройках репозитория!
+            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > .env
+            echo "DEBUG=False" >> .env
+            echo "NAME=${{ secrets.NAME }}" >> .env
+            echo "USER=${{ secrets.USER }}" >> .env
+            echo "PASSWORD=${{ secrets.PASSWORD }}" >> .env
+            echo "SERVER_IP=${{ secrets.SERVER_IP }}" >> .env
+            echo "SSH_KEY=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+            echo "SSH=USER${{ secrets.POSTGRES_PASSWORD }}" >> .env
+            echo "HOST=postgres" >> .env # Имя сервиса из docker-compose
+            echo "PORT=5432" >> .env
+#            echo "CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }}" >> .env
+#            echo "CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }}" >> .env
+#            echo "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}" >> .env
+            
+            # 3. Запускаем Docker Compose
+            # docker-compose pull скачает образы, которые вы запушили на Docker Hub
+            docker-compose pull
+            
+            # docker-compose up -d запустит все в фоновом режиме
+            # Флаг --build не нужен, так как мы используем готовые образы с Docker Hub
+            docker-compose up -d
+            
+            # 4. Применяем миграции после запуска
+            # Даем небольшую паузу, чтобы postgres успел запуститься
+            echo "Waiting for database to be ready..."
+            sleep 10 
+            docker-compose exec backend python manage.py migrate --noinput
+            
+            # 5. (Опционально) Собираем статику, если используете Nginx
+            # docker-compose exec backend python manage.py collectstatic --noinput
+            
+            # 6. (Опционально) Очищаем старые неиспользуемые Docker-образы, чтобы экономить место
+            docker image prune -af
