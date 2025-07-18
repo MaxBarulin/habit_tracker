@@ -1,210 +1,146 @@
-# Трекер привычек
+# Трекер привычек (API)
 
-## Описание
-Проект представляет собой веб-приложение для отслеживания привычек.
-Используется стек: Django + DRF + Celery + Redis + PostgreSQL.
+## Описание проекта
 
----
+**Habit Tracker** — это API-сервис для создания и отслеживания полезных привычек. Приложение позволяет пользователям управлять своими привычками, просматривать публичные привычки других пользователей и получать периодические напоминания в Telegram.
 
-## Установка
-
-1. Клонируйте репозиторий:
-   ```bash
-   git clone git@github.com:MaxBarulin/habit_tracker.git
-   cd habit_tracker
-   ```
-
-2. Установите зависимости (если хотите запускать локально):
-   ```bash
-   pip install poetry
-   poetry install
-   ```
-
-3. Создайте `.env` файл с переменными окружения:
-   ```bash
-   cp .env.example .env
-   ```
-   Заполните его своими данными.
-
-4. (Опционально) Если вы используете Docker:
-   ```bash
-   docker-compose build
-   docker-compose up
-   ```
+Проект реализован на стеке **Django + Django REST Framework**, с **Celery** для асинхронных задач, **Redis** в качестве брокера сообщений и **PostgreSQL** как основной базы данных. Весь проект контейнеризирован с помощью **Docker** и **Docker Compose** и настроен на автоматический деплой через **GitHub Actions**.
 
 ---
 
-## Архитектура проекта
+## Демо
 
-### Сервисы:
-- **habit_tracker** — основное Django-приложение (API и фронтенд)
-- **postgres** — PostgreSQL для хранения данных
-- **redis** — брокер сообщений для Celery
-- **celery** — обработчик асинхронных задач
-- **celery-beat** — планировщик периодических задач
+Проект развернут на сервере Yandex.Cloud и доступен по адресу:
 
----
+**API: `http://158.160.164.244:8000/`** (Замените на ваш IP)
 
-## Использование
-
-Запустите приложение через Docker Compose:
-```bash
-docker-compose up
-```
-
-После запуска:
-- Админка: [http://localhost:8000/admin](http://localhost:8000/admin)
+**Админ-панель:** `http://158.160.164.244:8000/admin/`
 
 ---
 
-## Проверка работоспособности сервисов
+## Основной функционал
 
-После запуска проверьте, что все контейнеры работают:
-```bash
-docker-compose ps
-```
-
-Результат должен быть примерно таким:
-```
-NAME                             COMMAND                  STATUS              PORTS
-habit_tracker-habit_tracker-1    "poetry run gunicorn …"  Up                  0.0.0.0:8000->8000/tcp
-habit_tracker-postgres-1         "docker-entrypoint.s…"     Up                  5432/tcp
-habit_tracker-redis-1            "docker-entrypoint.s…"     Up                  6379/tcp
-habit_tracker-celery-1           "poetry run celery -A …" Up
-habit_tracker-celery-beat-1      "poetry run celery -A …" Up
-```
-
-### Проверка каждого сервиса:
-
-#### 1. **PostgreSQL**
-Проверьте, что БД доступна:
-```bash
-docker-compose exec postgres psql -U postgres -c "SELECT version();"
-```
-
-#### 2. **Redis**
-Проверьте, что Redis работает:
-```bash
-docker-compose exec redis redis-cli ping
-```
-> Ответ должен быть: `PONG`
-
-#### 3. **Django (web)**  
-Откройте [http://localhost:8000](http://localhost:8000), должно открыться приложение или API.
-
-#### 4. **Celery worker**
-Логи:
-```bash
-docker-compose logs celery
-```
-Убедитесь, что нет ошибок подключения к Redis и БД.
-
-#### 5. **Celery Beat**
-Логи:
-```bash
-docker-compose logs celery-beat
-```
-Убедитесь, что планировщик запущен корректно.
+*   **Пользователи:** Регистрация и аутентификация по JWT (email + password).
+*   **Привычки:** Полный CRUD (создание, просмотр, редактирование, удаление) для своих привычек.
+*   **Публичность:** Возможность делать привычки публичными и просматривать список публичных привычек других пользователей.
+*   **Уведомления:** Автоматическая отправка напоминаний о выполнении привычек в Telegram с помощью Celery Beat.
 
 ---
 
-## Тестирование
+## Технологии
 
-Запустите тесты внутри контейнера:
-```bash
-docker-compose run habit_tracker poetry run python manage.py test
-```
-
----
-
-## Деплой на сервер
-
-1. Подключитесь к серверу по SSH:
-   ```bash
-   ssh user@your_server_ip
-   ```
-
-2. Склонируйте репозиторий:
-   ```bash
-   git clone git@github.com:MaxBarulin/habit_tracker.git
-   cd habit_tracker
-   ```
-
-3. Установите Docker и Docker Compose:
-   ```bash
-   sudo apt update && sudo apt install docker.io docker-compose -y
-   ```
-
-4. Запустите проект:
-   ```bash
-   docker-compose up -d
-   ```
-
-5. Примените миграции:
-   ```bash
-   docker-compose run habit_tracker poetry run python manage.py migrate
-   ```
-
-6. (Опционально) Создайте суперпользователя:
-   ```bash
-   docker-compose run habit_tracker poetry run python manage.py createsuperuser
-   ```
+*   **Backend**: Python, Django, Django REST Framework
+*   **База данных**: PostgreSQL
+*   **Фоновые задачи**: Celery, Redis
+*   **Аутентификация**: Djoser, Simple JWT
+*   **Документация API**: Drf-yasg (Swagger/ReDoc)
+*   **Тестирование**: Pytest
+*   **Контейнеризация и Деплой**: Docker, Docker Compose, Nginx, Gunicorn, GitHub Actions
 
 ---
 
-## Переменные окружения
+## Локальный запуск проекта
 
-Создайте `.env` файл на основе примера:
-```bash
-cp .env.example .env
-```
+Для запуска проекта на локальной машине необходимы установленные **Docker** и **Docker Compose**.
 
-Пример содержимого `.env`:
-```env
-# Настройки базы данных
-NAME=habit_db
-USER=postgres
-PASSWORD=postgres
-PORT=5432
+1.  **Клонируйте репозиторий:**
+    ```bash
+    git clone https://github.com/MaxBarulin/habit_tracker.git
+    cd habit_tracker
+    ```
 
-# Email (опционально)
-EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
-EMAIL_HOST=smtp.yandex.ru
-EMAIL_PORT=465
-EMAIL_USE_TLS=False
-EMAIL_USE_SSL=True
-EMAIL_HOST_USER=your_email@example.com
-EMAIL_HOST_PASSWORD=your_password
-SECRET_KEY=your_secret_key_here
-DEBUG=True
-```
+2.  **Создайте и заполните файл `.env`:**
+    Скопируйте файл-шаблон и внесите в него свои данные.
+    ```bash
+    cp .env.sample .env
+    ```
+    > **Важно:** Укажите в `.env` ваш `SECRET_KEY`, `TELEGRAM_BOT_TOKEN` и другие необходимые переменные.
 
----
+3.  **Запустите проект:**
+    Выполните команду из корневой директории проекта:
+    ```bash
+    docker-compose up --build
+    ```
+    При последующих запусках флаг `--build` можно опустить.
 
-## Полезные команды
-
-| Назначение | Команда |
-|-----------|---------|
-| Посмотреть логи | `docker-compose logs -f` |
-| Остановить контейнеры | `docker-compose down` |
-| Применить миграции | `docker-compose run habit_tracker poetry run python manage.py migrate` |
-| Собрать статику | `docker-compose run habit_tracker poetry run python manage.py collectstatic --noinput` |
-| Запустить shell в контейнере | `docker-compose run habit_tracker bash` |
+4.  **Проверка и инициализация:**
+    *   Проект будет доступен по адресу **`http://127.0.0.1:8000/`**.
+    *   Чтобы создать суперпользователя, откройте новый терминал и выполните:
+        ```bash
+        docker-compose exec backend python manage.py createsuperuser
+        ```
+    *   Миграции применяются автоматически при старте `backend` контейнера.
 
 ---
 
-## CI/CD
+## Настройка сервера и CI/CD для деплоя
 
-Проект настроен на автоматический деплой через GitHub Actions:
-- При пуше в `main` происходит:
-  - Сборка и тестирование
-  - Запуск миграций
-  - Перезапуск контейнеров на сервере
+Проект настроен на автоматический деплой на удаленный сервер при пуше в ветку `main`.
+
+### 1. Подготовка сервера (Yandex.Cloud)
+
+1.  **Создайте ВМ** на Ubuntu 22.04 LTS с публичным IP-адресом.
+2.  **Настройте группу безопасности:** откройте порты `22` (SSH), `80` (HTTP), `443` (HTTPS).
+3.  **Сгенерируйте SSH-ключ** в формате PEM для доступа GitHub Actions:
+    ```bash
+    ssh-keygen -t rsa -b 4096 -m PEM -f ./deploy_key
+    ```
+4.  **Добавьте публичную часть ключа (`deploy_key.pub`)** в настройки доступа вашей ВМ в Yandex.Cloud.
+5.  **Подключитесь к серверу** и установите Docker и Docker Compose:
+    ```bash
+    # Обновление и установка
+    sudo apt-get update && sudo apt-get install -y docker.io docker-compose
+
+    # Добавление пользователя в группу docker
+    sudo usermod -aG docker $USER
+    ```
+    После этого необходимо переподключиться к серверу, чтобы изменения прав вступили в силу.
+
+### 2. Настройка CI/CD в GitHub
+
+1.  Перейдите в настройки вашего репозитория на GitHub: **Settings > Secrets and variables > Actions**.
+2.  Создайте следующие **секреты (Repository secrets)**:
+    *   `DEBUG`
+    *   `DOCKER_HUB_ACCESS_TOKEN`
+    *   `DOCKER_HUB_USERNAME`
+    *   `HOST`
+    *   `NAME`
+    *   `PASSWORD`
+    *   `PORT`
+    *   `SECRET_KEY`
+    *   `SERVER_IP`
+    *   `SSH_KEY`
+    *   `SSH_USER`
+    *   `USER`
+
+### 3. Как работает CI/CD
+
+Workflow, описанный в `.github/workflows/cl.yml`, выполняет следующие шаги при пуше в ветку `main`:
+1.  **Lint & Test:** Проверяет код на соответствие стандартам (`flake8`) и запускает тесты (`pytest`).
+2.  **Build & Push:** Собирает Docker-образы для `backend`, `celery`, `celery-beat` и загружает их в Docker Hub.
+3.  **Deploy:**
+    *   Подключается к удаленному серверу по SSH.
+    *   Обновляет код из репозитория (`git pull`).
+    *   Создает на сервере актуальный `.env` файл из секретов GitHub.
+    *   Скачивает свежие образы с Docker Hub (`docker-compose pull`).
+    *   Перезапускает все сервисы в фоновом режиме (`docker-compose up -d`).
+    *   Применяет миграции базы данных (`docker-compose exec ... migrate`).
+
+---
+
+## API Эндпоинты
+
+-   `/users/` - эндпоинты для регистрации, аутентификации, управления пользователями (Djoser).
+-   `/habits/` - создание и просмотр списка своих привычек.
+-   `/habits/public/` - просмотр списка публичных привычек.
+-   `/habits/<int:pk>/` - управление конкретной привычкой (просмотр, изменение, удаление).
+-   `/docs/` - Автоматическая документация API (Swagger).
+-   `/redoc/` - Альтернативная документация API (ReDoc).
 
 ---
 
 ## Автор
 
-Максим Барулин  
-Telegram: @max_barulin  
-Email: maxbarulin@gmail.com
+*   **Максим Барулин**
+*   **Telegram**: @max_barulin
+*   **Email**: maxbarulin@gmail.com
